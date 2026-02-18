@@ -1,0 +1,72 @@
+{
+  "termine": [],
+  "brauvorgaenge": [
+    {
+      "id": 1771458385530,
+      "titel": "ttt",
+      "startDatum": "2026-02-18T23:46:20.660Z",
+      "brauart": "obergärig",
+      "gaertankId": 1,
+      "gaertankName": "Gärtank 1",
+      "belegteFaesser": [
+        1,
+        2,
+        3
+      ],
+      "faesserNamen": [
+        "Fass 1",
+        "Fass 2",
+        "Fass 3"
+      ],
+      "typ": "brauvorgang"
+    },
+    {
+      "id": 1771458412730,
+      "titel": "tresrghgfgd",
+      "startDatum": "2026-02-24T23:46:34.000Z",
+      "brauart": "untergärig",
+      "gaertankId": 1,
+      "gaertankName": "Gärtank 1",
+      "belegteFaesser": [
+        1,
+        2,
+        3
+      ],
+      "faesserNamen": [
+        "Fass 1",
+        "Fass 2",
+        "Fass 3"
+      ],
+      "typ": "brauvorgang"
+    }
+  ],
+  "gärtanks": [
+    {
+      "id": 1,
+      "name": "Gärtank 1",
+      "kapazität": 500,
+      "status": "verfügbar"
+    },
+    {
+      "id": 2,
+      "name": "Gärtank 2",
+      "kapazität": 500,
+      "status": "verfügbar"
+    },
+    {
+      "id": 3,
+      "name": "Gärtank 3",
+      "kapazität": 500,
+      "status": "verfügbar"
+    }
+  ],
+  "kühlschränke": [
+    {
+      "id": 1,
+      "name": "Kühlschrank 1",
+      "kapazität": 1000,
+      "status": "verfügbar"
+    }
+  ],
+  "fässer": []
+}

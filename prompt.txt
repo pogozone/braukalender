@@ -15,4 +15,8 @@ Es wird ein Starttermin eingegeben und ausgewählt, ob obergärig oder untergär
 Dazu ist es notwendig Gärtanks, Kühlschränke und Fässer mit zu verwalten.
 Aktuell gibt es einen Kühlschrank, drei Gärtanks und 20 Fässer.
 Pro Braugang wird ein Gärtank und 3 Fässer benötigt.
-Abhängig, ob obergärig (14 Tage) oder untergärig (10 Tage) gebraut wird, ist ein Gärtank 10 oder 14 Tage belegt und kann von keinem anderen Brauvorgang genutzt werden. Anschließend an diesen Zeitraum sind die drei Fässer für 10 oder 14 Tage belegt und können von keinem anderen Brauvorgang genutzt werden
+Abhängig, ob obergärig (14 Tage) oder untergärig (10 Tage) gebraut wird, ist ein Gärtank 10 oder 14 Tage belegt und kann von keinem anderen Brauvorgang genutzt werden. Anschließend an diesen Zeitraum sind die drei Fässer für 10 oder 14 Tage belegt und können von keinem anderen Brauvorgang genutzt werden.
+
+Die Daten:
+Die Daten sollen im Json Format gespeichert werden.
+Die Daten sollen in der Datei terminde.json gespeichert werden.
