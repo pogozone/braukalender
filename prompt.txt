@@ -1,0 +1,18 @@
+Ich brauche einen Kalender mit dem ich zum einen einfache Termine verwalten kann und zum anderen komplexere Brauvorgänge abbilden kann.
+
+Technische Voraussetzungen:
+Die Applikation soll mit React gebaut werden und mit node 'v16.20.2' laufen.
+Die Applikation soll ebenfalls mit apache2 funktionieren.
+Die Applikation soll mit dem aktuellen Bootstrap gebaut werden.
+
+Die Ansicht:
+Per Default soll der Kalender angezeigt werden. Der Kalender soll die Termine und Brauvorgänge anzeigen.
+Die Ansicht soll responsive sein und auf mobilen Geräten gut aussehen.
+Die Ansicht soll dem Google Calendar ähnlichen.
+
+Ein Brauvorgang sieht etwa so aus:
+Es wird ein Starttermin eingegeben und ausgewählt, ob obergärig oder untergärig. Dann schaut die Applikation selbst nach, ob ein Gärtank für die entsprechende Zeit zur Verfügung steht und ob am Ende der Zeit genug Fässer zur Verfügung stehen. Wenn ja, kann der Brauvorgang gespeichert werden. Wenn nein, wird eine entsprechende Meldung ausgegeben: "Kein Gärtank frei" oder "Nicht genug Fässer verfügbar".
+Dazu ist es notwendig Gärtanks, Kühlschränke und Fässer mit zu verwalten.
+Aktuell gibt es einen Kühlschrank, drei Gärtanks und 20 Fässer.
+Pro Braugang wird ein Gärtank und 3 Fässer benötigt.
+Abhängig, ob obergärig (14 Tage) oder untergärig (10 Tage) gebraut wird, ist ein Gärtank 10 oder 14 Tage belegt und kann von keinem anderen Brauvorgang genutzt werden. Anschließend an diesen Zeitraum sind die drei Fässer für 10 oder 14 Tage belegt und können von keinem anderen Brauvorgang genutzt werden

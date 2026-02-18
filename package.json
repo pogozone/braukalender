@@ -1,0 +1,38 @@
+{
+  "name": "braukalender",
+  "version": "1.0.0",
+  "description": "Braukalender Anwendung zur Verwaltung von Terminen und Brauvorgängen",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "bootstrap": "^5.3.2",
+    "react-big-calendar": "^1.8.2",
+    "moment": "^2.29.4",
+    "react-datepicker": "^4.21.0",
+    "react-bootstrap": "^2.9.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

@@ -1,0 +1,148 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+}
+
+.calendar-container {
+  height: calc(100vh - 200px);
+  margin: 20px;
+}
+
+.rbc-event {
+  padding: 2px 5px;
+  font-size: 12px;
+}
+
+.brauvorgang-event {
+  background-color: #28a745 !important;
+  border: 1px solid #1e7e34;
+}
+
+.termin-event {
+  background-color: #007bff !important;
+  border: 1px solid #0056b3;
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.modal-header {
+  background-color: #007bff;
+  color: white;
+}
+
+.form-label {
+  font-weight: 500;
+}
+
+.resource-status {
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+}
+
+.resource-available {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.resource-unavailable {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.rbc-three-month-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.rbc-year-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.rbc-month-view {
+  border-right: 1px solid #ddd;
+  padding: 0 5px;
+}
+
+.rbc-month-view:last-child {
+  border-right: none;
+}
+
+.rbc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.rbc-toolbar .rbc-btn-group {
+  display: flex;
+  gap: 5px;
+}
+
+.rbc-toolbar button {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.rbc-toolbar button:hover {
+  background: #f8f9fa;
+}
+
+.rbc-toolbar button.rbc-active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+@media (max-width: 768px) {
+  .rbc-toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .rbc-toolbar .rbc-btn-group {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .rbc-three-month-view .rbc-row-segment {
+    flex-direction: column;
+  }
+  
+  .rbc-month-view {
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+  }
+  
+  .rbc-month-view:last-child {
+    border-bottom: none;
+  }
+}
