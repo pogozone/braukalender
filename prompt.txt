@@ -26,3 +26,12 @@ Abhängig, ob obergärig (14 Tage) oder untergärig (10 Tage) gebraut wird, ist 
 Die Daten:
 Die Daten sollen im Json Format gespeichert werden.
 Die Daten sollen in der Datei terminde.json gespeichert werden.
+
+
+Todo:
+- Termin für Umdrücken einbauen
+- Farbliche Gestaltung von Brautag/Hauptgärung/Nachgärung und Terminen
+- 
+- Integration von Aufgaben, ähnlich James
+- Userverwaltung
+- Kennwortschutz
