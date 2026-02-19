@@ -59,24 +59,32 @@ function App() {
   }, [dataManager]);
 
   const kalenderEvents = [
-    ...(termine || []).map(termin => ({
-      id: termin.id,
-      title: termin.titel,
-      start: termin.startDatum,
-      end: termin.endDatum,
-      resource: termin,
-      className: 'termin-event'
-    })),
+    ...(termine || []).map(termin => {
+      const startDate = new Date(termin.startDatum);
+      const endDate = new Date(termin.endDatum);
+      
+      return {
+        id: termin.id,
+        title: termin.titel || 'Unbenannter Termin',
+        start: startDate,
+        end: endDate,
+        allDay: true,
+        resource: termin,
+        className: 'termin-event'
+      };
+    }),
     ...(brauvorgaenge || []).map(brauvorgang => {
       const dauer = brauzeiten[brauvorgang.brauart].tage;
-      const ende = new Date(brauvorgang.startDatum);
-      ende.setDate(ende.getDate() + dauer);
+      const startDate = new Date(brauvorgang.startDatum);
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + dauer);
       
       return {
         id: brauvorgang.id,
         title: `${brauvorgang.titel} - ${brauvorgang.gaertankName}`,
-        start: brauvorgang.startDatum,
-        end: ende,
+        start: startDate,
+        end: endDate,
+        allDay: true,
         resource: brauvorgang,
         className: 'brauvorgang-event'
       };
