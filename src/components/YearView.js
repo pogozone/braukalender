@@ -1,7 +1,53 @@
 import React from 'react';
-import { Card, Row, Col } from 'react-bootstrap';
-import { format, startOfMonth, endOfMonth, addMonths, startOfYear } from 'date-fns';
+import { Row, Col } from 'react-bootstrap';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay, startOfMonth, endOfMonth, addMonths, startOfYear } from 'date-fns';
 import de from 'date-fns/locale/de';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const locales = {
+  'de': de,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
+
+const MiniCalendar = ({ events, currentDate, title }) => {
+  return (
+    <div className="mini-calendar mb-3">
+      <h6 className="text-center mb-2">{title}</h6>
+      <Calendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        defaultDate={currentDate}
+        defaultView="month"
+        views={['month']}
+        toolbar={false}
+        style={{ height: '200px', fontSize: '10px' }}
+        messages={{
+          next: "",
+          previous: "",
+          today: "",
+          month: "",
+          week: "",
+          day: "",
+          agenda: "",
+          date: "",
+          time: "",
+          event: "",
+          noEventsInRange: ""
+        }}
+      />
+    </div>
+  );
+};
 
 const YearView = ({ events, currentDate }) => {
   const yearStart = startOfYear(currentDate);
@@ -30,39 +76,14 @@ const YearView = ({ events, currentDate }) => {
       <div className="year-header text-center mb-4">
         <h3>{format(currentDate, 'yyyy', { locale: de })}</h3>
       </div>
-      <Row className="g-3">
+      <Row className="g-2">
         {months.map((month, index) => (
           <Col key={index} md={4} sm={6}>
-            <Card className="h-100 month-card">
-              <Card.Header className="bg-primary text-white">
-                <h6 className="mb-0">{month.name}</h6>
-              </Card.Header>
-              <Card.Body className="p-2">
-                <div className="month-events">
-                  {month.events.slice(0, 3).map((event, eventIndex) => (
-                    <div key={eventIndex} className="mini-event mb-2 p-2 border rounded">
-                      <div className="event-title small fw-bold text-truncate">
-                        {event.title}
-                      </div>
-                      <div className="event-date text-muted small">
-                        {format(new Date(event.start), 'dd.MM.', { locale: de })}
-                        {event.end && format(new Date(event.end), '-dd.MM.', { locale: de })}
-                      </div>
-                    </div>
-                  ))}
-                  {month.events.length > 3 && (
-                    <div className="more-events text-muted small text-center p-2">
-                      +{month.events.length - 3} weitere
-                    </div>
-                  )}
-                  {month.events.length === 0 && (
-                    <div className="no-events text-muted small text-center p-3">
-                      Keine Termine
-                    </div>
-                  )}
-                </div>
-              </Card.Body>
-            </Card>
+            <MiniCalendar 
+              events={month.events}
+              currentDate={month.date}
+              title={month.name}
+            />
           </Col>
         ))}
       </Row>
