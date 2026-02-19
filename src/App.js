@@ -6,6 +6,8 @@ import de from 'date-fns/locale/de';
 import BrauvorgangModal from './components/BrauvorgangModal';
 import TerminModal from './components/TerminModal';
 import RessourcenUebersicht from './components/RessourcenUebersicht';
+import YearView from './components/YearView';
+import ThreeMonthsView from './components/ThreeMonthsView';
 import { initialResources, brauzeiten } from './data/resources';
 import { DataManager } from './utils/dataManager';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -30,6 +32,7 @@ function App() {
   const [showTerminModal, setShowTerminModal] = useState(false);
   const [resources, setResources] = useState(initialResources);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentView, setCurrentView] = useState('calendar');
 
   // Daten beim Start laden
   useEffect(() => {
@@ -150,35 +153,64 @@ function App() {
           </Navbar>
 
           <Container>
+            <div className="view-selector mb-3">
+              <Button 
+                variant={currentView === 'calendar' ? 'primary' : 'outline-primary'}
+                onClick={() => setCurrentView('calendar')}
+                className="me-2"
+              >
+                Kalender
+              </Button>
+              <Button 
+                variant={currentView === 'year' ? 'primary' : 'outline-primary'}
+                onClick={() => setCurrentView('year')}
+                className="me-2"
+              >
+                Jahresansicht
+              </Button>
+              <Button 
+                variant={currentView === '3months' ? 'primary' : 'outline-primary'}
+                onClick={() => setCurrentView('3months')}
+              >
+                3 Monate
+              </Button>
+            </div>
+            
             <Row>
               <Col lg={8}>
                 <div className="calendar-container">
-                  <Calendar
-                    localizer={localizer}
-                    events={kalenderEvents}
-                    startAccessor="start"
-                    endAccessor="end"
-                    style={{ height: '100%' }}
-                    views={['month', 'week', 'day', 'agenda']}
-                    defaultView="month"
-                    messages={{
-                      next: "Weiter",
-                      previous: "Zurück",
-                      today: "Heute",
-                      month: "Monat",
-                      week: "Woche",
-                      day: "Tag",
-                      agenda: "Agenda",
-                      date: "Datum",
-                      time: "Zeit",
-                      event: "Termin",
-                      noEventsInRange: "Keine Termine in diesem Zeitraum"
-                    }}
-                    onSelectEvent={handleEventClick}
-                    eventPropGetter={(event) => ({
-                      className: event.className
-                    })}
-                  />
+                  {currentView === 'calendar' ? (
+                    <Calendar
+                      localizer={localizer}
+                      events={kalenderEvents}
+                      startAccessor="start"
+                      endAccessor="end"
+                      style={{ height: '600px' }}
+                      views={['month', 'week', 'day', 'agenda']}
+                      defaultView="month"
+                      messages={{
+                        next: "Weiter",
+                        previous: "Zurück",
+                        today: "Heute",
+                        month: "Monat",
+                        week: "Woche",
+                        day: "Tag",
+                        agenda: "Agenda",
+                        date: "Datum",
+                        time: "Zeit",
+                        event: "Termin",
+                        noEventsInRange: "Keine Termine in diesem Zeitraum"
+                      }}
+                      onSelectEvent={handleEventClick}
+                      eventPropGetter={(event) => ({
+                        className: event.className
+                      })}
+                    />
+                  ) : currentView === 'year' ? (
+                    <YearView events={kalenderEvents} currentDate={new Date()} />
+                  ) : currentView === '3months' ? (
+                    <ThreeMonthsView events={kalenderEvents} currentDate={new Date()} />
+                  ) : null}
                 </div>
               </Col>
               <Col lg={4}>
