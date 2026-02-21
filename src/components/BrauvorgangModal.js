@@ -5,12 +5,15 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ResourceManager } from '../utils/resourceManager';
 import { brauzeiten } from '../data/resources';
 
-const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave, editingBrauvorgang }) => {
+const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave, onDelete, editingBrauvorgang }) => {
   const [titel, setTitel] = useState('');
   const [startDatum, setStartDatum] = useState(new Date());
   const [brauart, setBrauart] = useState('obergärig');
+  const [umdrueckDatum, setUmdrueckDatum] = useState(new Date());
   const [fehlermeldung, setFehlermeldung] = useState('');
-  const [resourceManager] = useState(() => new ResourceManager(resources, brauvorgaenge));
+
+  // Helper function to get fresh resource manager
+  const getResourceManager = () => new ResourceManager(resources, brauvorgaenge);
 
   useEffect(() => {
     if (show) {
@@ -19,15 +22,27 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
         setTitel(editingBrauvorgang.titel);
         setStartDatum(new Date(editingBrauvorgang.startDatum));
         setBrauart(editingBrauvorgang.brauart);
+        setUmdrueckDatum(editingBrauvorgang.umdrueckDatum ? new Date(editingBrauvorgang.umdrueckDatum) : new Date());
       } else {
         // New mode: reset form
         setTitel('');
         setStartDatum(new Date());
         setBrauart('obergärig');
+        setUmdrueckDatum(new Date());
       }
       setFehlermeldung('');
     }
   }, [show, editingBrauvorgang]);
+
+  useEffect(() => {
+    // Update umdrueckDatum when brauart changes
+    if (show) {
+      const dauer = brauzeiten[brauart].tage;
+      const neuesUmdrueckDatum = new Date(startDatum);
+      neuesUmdrueckDatum.setDate(neuesUmdrueckDatum.getDate() + dauer);
+      setUmdrueckDatum(neuesUmdrueckDatum);
+    }
+  }, [brauart, startDatum, show]);
 
   const handleSave = () => {
     setFehlermeldung('');
@@ -37,8 +52,9 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
       return;
     }
 
-    const gaertankVerfuegbar = resourceManager.pruefeGaertankVerfuegbarkeit(startDatum, brauart);
-    const faesserVerfuegbar = resourceManager.pruefeFaesserVerfuegbarkeit(startDatum, brauart);
+    const resourceManager = getResourceManager();
+    const gaertankVerfuegbar = resourceManager.pruefeGaertankVerfuegbarkeit(startDatum, brauart, editingBrauvorgang?.id);
+    const faesserVerfuegbar = resourceManager.pruefeFaesserVerfuegbarkeit(startDatum, brauart, editingBrauvorgang?.id);
 
     if (!gaertankVerfuegbar && !faesserVerfuegbar) {
       setFehlermeldung('Kein Gärtank frei und nicht genug Fässer verfügbar');
@@ -55,14 +71,15 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
       return;
     }
 
-    const gaertank = resourceManager.getVerfuegbarenGaertank(startDatum, brauart);
-    const faesser = resourceManager.getVerfuegbareFaesser(startDatum, brauart);
+    const gaertank = resourceManager.getVerfuegbarenGaertank(startDatum, brauart, editingBrauvorgang?.id);
+    const faesser = resourceManager.getVerfuegbareFaesser(startDatum, brauart, editingBrauvorgang?.id);
 
     const brauvorgang = {
       id: editingBrauvorgang ? editingBrauvorgang.id : Date.now(),
       titel,
       startDatum,
       brauart,
+      umdrueckDatum,
       gaertankId: gaertank.id,
       gaertankName: gaertank.name,
       belegteFaesser: faesser.map(f => f.id),
@@ -72,6 +89,13 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
 
     onSave(brauvorgang);
     handleClose();
+  };
+
+  const handleDelete = () => {
+    if (editingBrauvorgang && window.confirm(`Möchten Sie den Brauvorgang "${editingBrauvorgang.titel}" wirklich löschen?`)) {
+      onDelete(editingBrauvorgang.id);
+      handleClose();
+    }
   };
 
   return (
@@ -116,6 +140,20 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
             </Form.Select>
           </Form.Group>
 
+          <Form.Group className="mb-3">
+            <Form.Label>Umdrücken</Form.Label>
+            <DatePicker
+              selected={umdrueckDatum}
+              onChange={setUmdrueckDatum}
+              className="form-control"
+              dateFormat="dd.MM.yyyy"
+              minDate={startDatum}
+            />
+            <Form.Text className="text-muted">
+              Datum für das Umdrücken (Standard: {brauzeiten[brauart].tage} Tage nach Start)
+            </Form.Text>
+          </Form.Group>
+
           <div className="mb-3">
             <h6>Benötigte Ressourcen:</h6>
             <ul>
@@ -126,7 +164,7 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
 
           <div className="resource-status">
             <h6>Verfügbarkeitsprüfung:</h6>
-            {resourceManager.pruefeGaertankVerfuegbarkeit(startDatum, brauart) ? (
+            {getResourceManager().pruefeGaertankVerfuegbarkeit(startDatum, brauart, editingBrauvorgang?.id) ? (
               <div className="resource-available">
                 ✓ Gärtank verfügbar
               </div>
@@ -135,7 +173,7 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
                 ✗ Kein Gärtank verfügbar
               </div>
             )}
-            {resourceManager.pruefeFaesserVerfuegbarkeit(startDatum, brauart) ? (
+            {getResourceManager().pruefeFaesserVerfuegbarkeit(startDatum, brauart, editingBrauvorgang?.id) ? (
               <div className="resource-available">
                 ✓ Genug Fässer verfügbar
               </div>
@@ -151,12 +189,17 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
         <Button variant="secondary" onClick={handleClose}>
           Abbrechen
         </Button>
+        {editingBrauvorgang && (
+          <Button variant="danger" onClick={handleDelete}>
+            Löschen
+          </Button>
+        )}
         <Button 
           variant="success" 
           onClick={handleSave}
           disabled={!titel.trim() || 
-                   !resourceManager.pruefeGaertankVerfuegbarkeit(startDatum, brauart) || 
-                   !resourceManager.pruefeFaesserVerfuegbarkeit(startDatum, brauart)}
+                   !getResourceManager().pruefeGaertankVerfuegbarkeit(startDatum, brauart, editingBrauvorgang?.id) || 
+                   !getResourceManager().pruefeFaesserVerfuegbarkeit(startDatum, brauart, editingBrauvorgang?.id)}
         >
           {editingBrauvorgang ? 'Brauvorgang aktualisieren' : 'Brauvorgang speichern'}
         </Button>

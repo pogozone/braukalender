@@ -6,15 +6,22 @@ export class ResourceManager {
     this.brauvorgaenge = brauvorgaenge;
   }
 
-  pruefeGaertankVerfuegbarkeit(startDatum, brauart) {
+  pruefeGaertankVerfuegbarkeit(startDatum, brauart, excludeBrauvorgangId = null) {
     const dauer = brauzeiten[brauart].tage;
     const endDatum = new Date(startDatum);
     endDatum.setDate(endDatum.getDate() + dauer);
 
     return this.resources.gaertanks.some(tank => {
       return !this.brauvorgaenge.some(brauvorgang => {
+        // Exclude current brauvorgang when editing
+        if (excludeBrauvorgangId && brauvorgang.id === excludeBrauvorgangId) {
+          return false;
+        }
+        
         if (brauvorgang.gaertankId === tank.id) {
-          const brauvorgangEnde = new Date(brauvorgang.startDatum);
+          const brauvorgangEnde = brauvorgang.umdrueckDatum 
+            ? new Date(brauvorgang.umdrueckDatum)
+            : new Date(brauvorgang.startDatum);
           brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
           
           return !(endDatum <= brauvorgang.startDatum || startDatum >= brauvorgangEnde);
@@ -24,7 +31,7 @@ export class ResourceManager {
     });
   }
 
-  pruefeFaesserVerfuegbarkeit(startDatum, brauart) {
+  pruefeFaesserVerfuegbarkeit(startDatum, brauart, excludeBrauvorgangId = null) {
     const dauer = brauzeiten[brauart].tage;
     const benoetigteFaesser = 3;
     const endDatum = new Date(startDatum);
@@ -32,8 +39,15 @@ export class ResourceManager {
 
     const verfuegbareFaesser = this.resources.faesser.filter(fass => {
       return !this.brauvorgaenge.some(brauvorgang => {
+        // Exclude current brauvorgang when editing
+        if (excludeBrauvorgangId && brauvorgang.id === excludeBrauvorgangId) {
+          return false;
+        }
+        
         if (brauvorgang.belegteFaesser.includes(fass.id)) {
-          const brauvorgangEnde = new Date(brauvorgang.startDatum);
+          const brauvorgangEnde = brauvorgang.umdrueckDatum 
+            ? new Date(brauvorgang.umdrueckDatum)
+            : new Date(brauvorgang.startDatum);
           brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
           
           return !(endDatum <= brauvorgang.startDatum || startDatum >= brauvorgangEnde);
@@ -45,15 +59,22 @@ export class ResourceManager {
     return verfuegbareFaesser.length >= benoetigteFaesser;
   }
 
-  getVerfuegbarenGaertank(startDatum, brauart) {
+  getVerfuegbarenGaertank(startDatum, brauart, excludeBrauvorgangId = null) {
     const dauer = brauzeiten[brauart].tage;
     const endDatum = new Date(startDatum);
     endDatum.setDate(endDatum.getDate() + dauer);
 
     return this.resources.gaertanks.find(tank => {
       return !this.brauvorgaenge.some(brauvorgang => {
+        // Exclude current brauvorgang when editing
+        if (excludeBrauvorgangId && brauvorgang.id === excludeBrauvorgangId) {
+          return false;
+        }
+        
         if (brauvorgang.gaertankId === tank.id) {
-          const brauvorgangEnde = new Date(brauvorgang.startDatum);
+          const brauvorgangEnde = brauvorgang.umdrueckDatum 
+            ? new Date(brauvorgang.umdrueckDatum)
+            : new Date(brauvorgang.startDatum);
           brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
           
           return !(endDatum <= brauvorgang.startDatum || startDatum >= brauvorgangEnde);
@@ -63,15 +84,22 @@ export class ResourceManager {
     });
   }
 
-  getVerfuegbareFaesser(startDatum, brauart) {
+  getVerfuegbareFaesser(startDatum, brauart, excludeBrauvorgangId = null) {
     const dauer = brauzeiten[brauart].tage;
     const endDatum = new Date(startDatum);
     endDatum.setDate(endDatum.getDate() + dauer);
 
     const verfuegbareFaesser = this.resources.faesser.filter(fass => {
       return !this.brauvorgaenge.some(brauvorgang => {
+        // Exclude current brauvorgang when editing
+        if (excludeBrauvorgangId && brauvorgang.id === excludeBrauvorgangId) {
+          return false;
+        }
+        
         if (brauvorgang.belegteFaesser.includes(fass.id)) {
-          const brauvorgangEnde = new Date(brauvorgang.startDatum);
+          const brauvorgangEnde = brauvorgang.umdrueckDatum 
+            ? new Date(brauvorgang.umdrueckDatum)
+            : new Date(brauvorgang.startDatum);
           brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
           
           return !(endDatum <= brauvorgang.startDatum || startDatum >= brauvorgangEnde);
@@ -89,7 +117,9 @@ export class ResourceManager {
       gaertanks: this.resources.gaertanks.map(tank => {
         const belegt = this.brauvorgaenge.some(brauvorgang => {
           if (brauvorgang.gaertankId === tank.id) {
-            const brauvorgangEnde = new Date(brauvorgang.startDatum);
+            const brauvorgangEnde = brauvorgang.umdrueckDatum 
+              ? new Date(brauvorgang.umdrueckDatum)
+              : new Date(brauvorgang.startDatum);
             brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
             return heute < brauvorgangEnde;
           }
@@ -100,7 +130,9 @@ export class ResourceManager {
       faesser: this.resources.faesser.map(fass => {
         const belegt = this.brauvorgaenge.some(brauvorgang => {
           if (brauvorgang.belegteFaesser.includes(fass.id)) {
-            const brauvorgangEnde = new Date(brauvorgang.startDatum);
+            const brauvorgangEnde = brauvorgang.umdrueckDatum 
+              ? new Date(brauvorgang.umdrueckDatum)
+              : new Date(brauvorgang.startDatum);
             brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
             return heute < brauvorgangEnde;
           }

@@ -1,0 +1,25 @@
+/* Umdrücken-Termin Styling */
+.umdrueck-event {
+  background-color: #ff9800 !important;
+  border: 1px solid #f57c00 !important;
+  color: white !important;
+  font-weight: bold !important;
+}
+
+.umdrueck-event .rbc-event-content {
+  padding: 2px 4px !important;
+}
+
+/* Brauvorgang-Termin Styling */
+.brauvorgang-event {
+  background-color: #28a745 !important;
+  border: 1px solid #1e7e34 !important;
+  color: white !important;
+}
+
+/* Termin-Termin Styling */
+.termin-event {
+  background-color: #007bff !important;
+  border: 1px solid #0056b3 !important;
+  color: white !important;
+}

@@ -17,7 +17,7 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-const MiniCalendar = ({ events, currentDate, title, onSelectEvent }) => {
+const MiniCalendar = ({ events, currentDate, title, onSelectEvent, onDoubleClickEvent }) => {
   return (
     <div className="mini-calendar">
       <h5 className="text-center mb-3">{title}</h5>
@@ -32,6 +32,7 @@ const MiniCalendar = ({ events, currentDate, title, onSelectEvent }) => {
         toolbar={false}
         style={{ height: '300px', fontSize: '12px' }}
         onSelectEvent={onSelectEvent}
+        onDoubleClickEvent={onDoubleClickEvent}
         messages={{
           next: "",
           previous: "",
@@ -50,7 +51,7 @@ const MiniCalendar = ({ events, currentDate, title, onSelectEvent }) => {
   );
 };
 
-const ThreeMonthsView = ({ events, currentDate, onSelectEvent }) => {
+const ThreeMonthsView = ({ events, currentDate, onSelectEvent, onDoubleClickEvent }) => {
   const currentMonth = startOfMonth(currentDate);
   const previousMonth = addMonths(currentMonth, -1);
   const nextMonth = addMonths(currentMonth, 1);
@@ -79,6 +80,7 @@ const ThreeMonthsView = ({ events, currentDate, onSelectEvent }) => {
             currentDate={previousMonth}
             title={format(previousMonth, 'MMMM yyyy', { locale: de })}
             onSelectEvent={onSelectEvent}
+        onDoubleClickEvent={onDoubleClickEvent}
           />
         </Col>
         <Col md={4}>
@@ -87,6 +89,7 @@ const ThreeMonthsView = ({ events, currentDate, onSelectEvent }) => {
             currentDate={currentMonth}
             title={format(currentMonth, 'MMMM yyyy', { locale: de })}
             onSelectEvent={onSelectEvent}
+        onDoubleClickEvent={onDoubleClickEvent}
           />
         </Col>
         <Col md={4}>
@@ -95,6 +98,7 @@ const ThreeMonthsView = ({ events, currentDate, onSelectEvent }) => {
             currentDate={nextMonth}
             title={format(nextMonth, 'MMMM yyyy', { locale: de })}
             onSelectEvent={onSelectEvent}
+        onDoubleClickEvent={onDoubleClickEvent}
           />
         </Col>
       </Row>

@@ -11,6 +11,7 @@ import ThreeMonthsView from './components/ThreeMonthsView';
 import { initialResources, brauzeiten } from './data/resources';
 import { DataManager } from './utils/dataManager';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import './components/CalendarStyles.css';
 
 const locales = {
   'de': de,
@@ -77,13 +78,14 @@ function App() {
         className: 'termin-event'
       };
     }),
-    ...(brauvorgaenge || []).map(brauvorgang => {
+    ...(brauvorgaenge || []).flatMap(brauvorgang => {
       const dauer = brauzeiten[brauvorgang.brauart].tage;
       const startDate = new Date(brauvorgang.startDatum);
-      const endDate = new Date(startDate);
+      const endDate = brauvorgang.umdrueckDatum ? new Date(brauvorgang.umdrueckDatum) : new Date(startDate);
       endDate.setDate(endDate.getDate() + dauer);
       
-      return {
+      // Haupt-Brauvorgang Event
+      const brauvorgangEvent = {
         id: brauvorgang.id,
         title: `${brauvorgang.titel} - ${brauvorgang.gaertankName}`,
         start: startDate,
@@ -92,6 +94,26 @@ function App() {
         resource: brauvorgang,
         className: 'brauvorgang-event'
       };
+      
+      // Umdrücken-Termin (falls vorhanden)
+      const events = [brauvorgangEvent];
+      if (brauvorgang.umdrueckDatum) {
+        const umdrueckDate = new Date(brauvorgang.umdrueckDatum);
+        const umdrueckEndDate = new Date(umdrueckDate);
+        umdrueckEndDate.setDate(umdrueckEndDate.getDate() + 1); // 1 Tag für Umdrücken
+        
+        events.push({
+          id: `umdrueck-${brauvorgang.id}`,
+          title: `Umdrücken: ${brauvorgang.titel}`,
+          start: umdrueckDate,
+          end: umdrueckEndDate,
+          allDay: true,
+          resource: { ...brauvorgang, typ: 'umdrueck', umdrueckDatum: brauvorgang.umdrueckDatum },
+          className: 'umdrueck-event'
+        });
+      }
+      
+      return events;
     })
   ];
 
@@ -114,6 +136,15 @@ function App() {
     }
   }, [dataManager, editingBrauvorgang]);
 
+  const handleBrauvorgangDelete = useCallback((id) => {
+    setBrauvorgaenge(prev => {
+      const updated = prev.filter(b => b.id !== id);
+      dataManager.deleteBrauvorgang(id);
+      return updated;
+    });
+    setEditingBrauvorgang(null);
+  }, [dataManager]);
+
   const handleTerminSave = useCallback((termin) => {
     setTermine(prev => {
       const neueTermine = [...prev, termin];
@@ -123,7 +154,7 @@ function App() {
   }, [dataManager]);
 
   const handleEventClick = useCallback((event) => {
-    if (event.resource.typ === 'brauvorgang') {
+    if (event.resource.typ === 'brauvorgang' || event.resource.typ === 'umdrueck') {
       const brauvorgang = event.resource;
       setEditingBrauvorgang(brauvorgang);
       setShowBrauvorgangModal(true);
@@ -132,6 +163,21 @@ function App() {
       alert(`Termin Details:\n\nTitel: ${termin.titel}\nStart: ${termin.startDatum.toLocaleString()}\nEnde: ${termin.endDatum.toLocaleString()}\nBeschreibung: ${termin.beschreibung || 'Keine'}`);
     }
   }, []);
+
+  const handleEventDelete = useCallback((event) => {
+    if (event.resource.typ === 'brauvorgang' || event.resource.typ === 'umdrueck') {
+      const brauvorgang = event.resource;
+      if (window.confirm(`Möchten Sie den Brauvorgang "${brauvorgang.titel}" wirklich löschen?`)) {
+        handleBrauvorgangDelete(brauvorgang.id);
+      }
+    } else {
+      const termin = event.resource;
+      if (window.confirm(`Möchten Sie den Termin "${termin.titel}" wirklich löschen?`)) {
+        // TODO: Implement termin deletion
+        alert('Termin-Löschung noch nicht implementiert');
+      }
+    }
+  }, [handleBrauvorgangDelete]);
 
   return (
     <div>
@@ -200,6 +246,8 @@ function App() {
                       style={{ height: '600px' }}
                       views={['month', 'week', 'day', 'agenda']}
                       defaultView="month"
+                      onSelectEvent={handleEventClick}
+                      onDoubleClickEvent={handleEventDelete}
                       messages={{
                         next: "Weiter",
                         previous: "Zurück",
@@ -213,15 +261,14 @@ function App() {
                         event: "Termin",
                         noEventsInRange: "Keine Termine in diesem Zeitraum"
                       }}
-                      onSelectEvent={handleEventClick}
                       eventPropGetter={(event) => ({
                         className: event.className
                       })}
                     />
                   ) : currentView === 'year' ? (
-                    <YearView events={kalenderEvents} currentDate={new Date()} onSelectEvent={handleEventClick} />
+                    <YearView events={kalenderEvents} currentDate={new Date()} onSelectEvent={handleEventClick} onDoubleClickEvent={handleEventDelete} />
                   ) : currentView === '3months' ? (
-                    <ThreeMonthsView events={kalenderEvents} currentDate={new Date()} onSelectEvent={handleEventClick} />
+                    <ThreeMonthsView events={kalenderEvents} currentDate={new Date()} onSelectEvent={handleEventClick} onDoubleClickEvent={handleEventDelete} />
                   ) : null}
                 </div>
               </Col>
@@ -243,6 +290,7 @@ function App() {
             resources={resources}
             brauvorgaenge={brauvorgaenge}
             onSave={handleBrauvorgangSave}
+            onDelete={handleBrauvorgangDelete}
             editingBrauvorgang={editingBrauvorgang}
           />
 

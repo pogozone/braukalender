@@ -21,7 +21,9 @@ Es wird ein Starttermin eingegeben und ausgewählt, ob obergärig oder untergär
 Dazu ist es notwendig Gärtanks, Kühlschränke und Fässer mit zu verwalten.
 Aktuell gibt es einen Kühlschrank, drei Gärtanks und 20 Fässer.
 Pro Braugang wird ein Gärtank und 3 Fässer benötigt.
-Abhängig, ob obergärig (14 Tage) oder untergärig (10 Tage) gebraut wird, ist ein Gärtank 10 oder 14 Tage belegt und kann von keinem anderen Brauvorgang genutzt werden. Anschließend an diesen Zeitraum sind die drei Fässer für 10 oder 14 Tage belegt und können von keinem anderen Brauvorgang genutzt werden.
+Gärtanks und Fässer können nicht doppelt belegt werden. Wenn also alle Tanks oder alle Fässe belegt sind und für einen weiteren Brauvorgang nicht zur Verfügung stehen, muss beim Neuanlegen oder Bearbeiten eines Brauvorgangs eine entsprechende Meldung ausgegeben und das Speichern verhindert werden.
+Abhängig, ob obergärig (14 Tage) oder untergärig (10 Tage) gebraut wird, ist ein Gärtank 10 oder 14 Tage belegt und kann von keinem anderen Brauvorgang genutzt werden. Anschließend an diesen Zeitraum sind die drei Fässer für 10 oder 14 Tage belegt und können von keinem anderen Brauvorgang genutzt werden
+Brauvorgänge sollen auch gelöscht werden können. Und zwar sowohl in der Bearbeiten Maske, als auch in der Kalenderansicht. Wird in der Kalenderansicht gelöscht, dann soll eine Sicherheitsabrage ausgegeben werden.
 
 Die Daten:
 Die Daten sollen im Json Format gespeichert werden.
@@ -33,6 +35,12 @@ Helpers:
 - Erstelle ein Script für Ubuntu im Verzeichnis /bin, mit dem eine zur Applikation passende MongoDB Datenbank erstellt wird.
 - Erstelle ein Script für Ubuntu im Verzeichnis /bin, mit dem eine zur Applikation passende MySQL Datenbank erstellt wird.
 
+Edit:
+- Ein Klick auf einen Brauvorgang, egal in welcher Ansicht, soll eine Maske zum Bearbeiten öffnen.
+
+Umdrücken:
+- Innerhalb eines Brauvorgangs gibt es einen weiteren Termin "Umdrücken". Der Termin ist per Default entsprechend der Brauart (obergärig 14 Tage, untergärig 10 Tage) nach dem Brauvorgang. Der Termin soll bearbeitbar sein. Je nach dem ob er nach vorne oder hinten geschoben wird, verschiebt sich auch das Ende des Brauvorgangs.
+- Wenn ich die Brauart ändere, dann soll sich automatisch der Termin für Umdrücken auch ändern.
 
 Todo:
 - Termin für Umdrücken einbauen

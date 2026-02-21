@@ -17,7 +17,7 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-const MiniCalendar = ({ events, currentDate, title, onSelectEvent }) => {
+const MiniCalendar = ({ events, currentDate, title, onSelectEvent, onDoubleClickEvent }) => {
   return (
     <div className="mini-calendar mb-3">
       <h6 className="text-center mb-2">{title}</h6>
@@ -32,6 +32,7 @@ const MiniCalendar = ({ events, currentDate, title, onSelectEvent }) => {
         toolbar={false}
         style={{ height: '200px', fontSize: '10px' }}
         onSelectEvent={onSelectEvent}
+        onDoubleClickEvent={onDoubleClickEvent}
         messages={{
           next: "",
           previous: "",
@@ -50,7 +51,7 @@ const MiniCalendar = ({ events, currentDate, title, onSelectEvent }) => {
   );
 };
 
-const YearView = ({ events, currentDate, onSelectEvent }) => {
+const YearView = ({ events, currentDate, onSelectEvent, onDoubleClickEvent }) => {
   const yearStart = startOfYear(currentDate);
   const months = [];
   
@@ -85,6 +86,7 @@ const YearView = ({ events, currentDate, onSelectEvent }) => {
               currentDate={month.date}
               title={month.name}
               onSelectEvent={onSelectEvent}
+              onDoubleClickEvent={onDoubleClickEvent}
             />
           </Col>
         ))}
