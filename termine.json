@@ -21,71 +21,24 @@
       "typ": "brauvorgang"
     },
     {
-      "id": 1771458412730,
-      "titel": "tresrghgfgd",
-      "startDatum": "2026-02-24T23:46:34.000Z",
-      "brauart": "untergärig",
-      "gaertankId": 1,
-      "gaertankName": "Gärtank 1",
-      "belegteFaesser": [
-        1,
-        2,
-        3
-      ],
-      "faesserNamen": [
-        "Fass 1",
-        "Fass 2",
-        "Fass 3"
-      ],
-      "typ": "brauvorgang"
-    },
-    {
-      "id": 1771460482030,
+      "id": 1771702851079,
       "titel": "qqq",
-      "startDatum": "2026-02-19T00:21:17.890Z",
+      "startDatum": "2026-02-21T19:40:46.664Z",
       "brauart": "obergärig",
-      "gaertankId": 2,
-      "gaertankName": "Gärtank 2",
+      "gaertankId": 3,
+      "gaertankName": "Gärtank 3",
       "belegteFaesser": [
-        4,
-        5,
-        6
+        7,
+        8,
+        9
       ],
       "faesserNamen": [
-        "Fass 4",
-        "Fass 5",
-        "Fass 6"
+        "Fass 7",
+        "Fass 8",
+        "Fass 9"
       ],
       "typ": "brauvorgang"
     }
   ],
-  "gärtanks": [
-    {
-      "id": 1,
-      "name": "Gärtank 1",
-      "kapazität": 500,
-      "status": "verfügbar"
-    },
-    {
-      "id": 2,
-      "name": "Gärtank 2",
-      "kapazität": 500,
-      "status": "verfügbar"
-    },
-    {
-      "id": 3,
-      "name": "Gärtank 3",
-      "kapazität": 500,
-      "status": "verfügbar"
-    }
-  ],
-  "kühlschränke": [
-    {
-      "id": 1,
-      "name": "Kühlschrank 1",
-      "kapazität": 1000,
-      "status": "verfügbar"
-    }
-  ],
-  "fässer": []
+  "resources": {}
 }

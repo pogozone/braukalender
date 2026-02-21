@@ -1,52 +1,22 @@
 import { StorageInterface } from './StorageInterface';
-import STORAGE_CONFIG from '../config/storageConfig';
 
-// MongoDB Storage Implementation
+// MongoDB Storage Implementation (API-basiert)
 export class MongoStorage extends StorageInterface {
   constructor() {
     super();
-    this.client = null;
-    this.db = null;
-    this.isConnected = false;
-  }
-
-  async connect() {
-    if (this.isConnected) return;
-    
-    try {
-      // Für Client-seitige MongoDB Nutzung würde man normalerweise eine API verwenden
-      // Hier als Beispiel für zukünftige Server-seitige Implementierung
-      const { MongoClient } = require('mongodb');
-      this.client = new MongoClient(STORAGE_CONFIG.mongodb.url, STORAGE_CONFIG.mongodb.options);
-      await this.client.connect();
-      this.db = this.client.db();
-      this.isConnected = true;
-      console.log('MongoDB verbunden');
-    } catch (error) {
-      console.error('MongoDB Verbindungsfehler:', error);
-      throw error;
-    }
+    this.apiUrl = process.env.NODE_ENV === 'production' 
+      ? '/api/data' 
+      : 'http://localhost:3001/api/data';
   }
 
   async load() {
     try {
-      await this.connect();
-      
-      const termineCollection = this.db.collection('termine');
-      const brauvorgaengeCollection = this.db.collection('brauvorgaenge');
-      const resourcesCollection = this.db.collection('resources');
-      
-      const [termine, brauvorgaenge, resources] = await Promise.all([
-        termineCollection.find({}).toArray(),
-        brauvorgaengeCollection.find({}).toArray(),
-        resourcesCollection.findOne({}) || {}
-      ]);
-      
-      return {
-        termine: termine || [],
-        brauvorgaenge: brauvorgaenge || [],
-        resources: resources || {}
-      };
+      const response = await fetch(this.apiUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Fehler beim Laden aus MongoDB:', error);
       return {
@@ -59,40 +29,17 @@ export class MongoStorage extends StorageInterface {
 
   async save(data) {
     try {
-      await this.connect();
+      const response = await fetch(this.apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
       
-      const termineCollection = this.db.collection('termine');
-      const brauvorgaengeCollection = this.db.collection('brauvorgaenge');
-      const resourcesCollection = this.db.collection('resources');
-      
-      // Batch-Operationen für bessere Performance
-      const session = this.client.startSession();
-      
-      try {
-        await session.withTransaction(async () => {
-          // Alle bestehenden Daten löschen
-          await termineCollection.deleteMany({});
-          await brauvorgaengeCollection.deleteMany({});
-          await resourcesCollection.deleteMany({});
-          
-          // Neue Daten einfügen
-          if (data.termine && data.termine.length > 0) {
-            await termineCollection.insertMany(data.termine);
-          }
-          
-          if (data.brauvorgaenge && data.brauvorgaenge.length > 0) {
-            await brauvorgaengeCollection.insertMany(data.brauvorgaenge);
-          }
-          
-          if (data.resources) {
-            await resourcesCollection.insertOne(data.resources);
-          }
-        });
-      } finally {
-        await session.endSession();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      return { success: true };
+      return await response.json();
     } catch (error) {
       console.error('Fehler beim Speichern in MongoDB:', error);
       throw error;
@@ -100,66 +47,52 @@ export class MongoStorage extends StorageInterface {
   }
 
   async addBrauvorgang(brauvorgang) {
-    await this.connect();
-    const collection = this.db.collection('brauvorgaenge');
-    const result = await collection.insertOne(brauvorgang);
-    return { ...brauvorgang, _id: result.insertedId };
+    const data = await this.load();
+    data.brauvorgaenge.push(brauvorgang);
+    await this.save(data);
+    return brauvorgang;
   }
 
   async addTermin(termin) {
-    await this.connect();
-    const collection = this.db.collection('termine');
-    const result = await collection.insertOne(termin);
-    return { ...termin, _id: result.insertedId };
+    const data = await this.load();
+    data.termine.push(termin);
+    await this.save(data);
+    return termin;
   }
 
   async updateBrauvorgang(id, updatedBrauvorgang) {
-    await this.connect();
-    const collection = this.db.collection('brauvorgaenge');
-    const result = await collection.updateOne(
-      { id: id },
-      { $set: updatedBrauvorgang }
-    );
-    
-    if (result.matchedCount === 0) {
-      throw new Error('Brauvorgang nicht gefunden');
+    const data = await this.load();
+    const index = data.brauvorgaenge.findIndex(b => b.id === id);
+    if (index !== -1) {
+      data.brauvorgaenge[index] = updatedBrauvorgang;
+      await this.save(data);
+      return updatedBrauvorgang;
     }
-    return updatedBrauvorgang;
+    throw new Error('Brauvorgang nicht gefunden');
   }
 
   async updateTermin(id, updatedTermin) {
-    await this.connect();
-    const collection = this.db.collection('termine');
-    const result = await collection.updateOne(
-      { id: id },
-      { $set: updatedTermin }
-    );
-    
-    if (result.matchedCount === 0) {
-      throw new Error('Termin nicht gefunden');
+    const data = await this.load();
+    const index = data.termine.findIndex(t => t.id === id);
+    if (index !== -1) {
+      data.termine[index] = updatedTermin;
+      await this.save(data);
+      return updatedTermin;
     }
-    return updatedTermin;
+    throw new Error('Termin nicht gefunden');
   }
 
   async deleteBrauvorgang(id) {
-    await this.connect();
-    const collection = this.db.collection('brauvorgaenge');
-    const result = await collection.deleteOne({ id: id });
-    return result.deletedCount > 0;
+    const data = await this.load();
+    data.brauvorgaenge = data.brauvorgaenge.filter(b => b.id !== id);
+    await this.save(data);
+    return true;
   }
 
   async deleteTermin(id) {
-    await this.connect();
-    const collection = this.db.collection('termine');
-    const result = await collection.deleteOne({ id: id });
-    return result.deletedCount > 0;
-  }
-
-  async disconnect() {
-    if (this.client && this.isConnected) {
-      await this.client.close();
-      this.isConnected = false;
-      console.log('MongoDB Verbindung getrennt');
-    }
+    const data = await this.load();
+    data.termine = data.termine.filter(t => t.id !== id);
+    await this.save(data);
+    return true;
   }
 }
