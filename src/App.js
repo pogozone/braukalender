@@ -30,6 +30,7 @@ function App() {
   const [termine, setTermine] = useState([]);
   const [showBrauvorgangModal, setShowBrauvorgangModal] = useState(false);
   const [showTerminModal, setShowTerminModal] = useState(false);
+  const [editingBrauvorgang, setEditingBrauvorgang] = useState(null);
   const [resources, setResources] = useState(initialResources);
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState('calendar');
@@ -95,12 +96,23 @@ function App() {
   ];
 
   const handleBrauvorgangSave = useCallback((brauvorgang) => {
-    setBrauvorgaenge(prev => {
-      const neueBrauvorgaenge = [...prev, brauvorgang];
-      dataManager.addBrauvorgang(brauvorgang);
-      return neueBrauvorgaenge;
-    });
-  }, [dataManager]);
+    if (editingBrauvorgang) {
+      // Update existing brauvorgang
+      setBrauvorgaenge(prev => {
+        const updated = prev.map(b => b.id === brauvorgang.id ? brauvorgang : b);
+        dataManager.updateBrauvorgang(brauvorgang.id, brauvorgang);
+        return updated;
+      });
+      setEditingBrauvorgang(null);
+    } else {
+      // Add new brauvorgang
+      setBrauvorgaenge(prev => {
+        const neueBrauvorgaenge = [...prev, brauvorgang];
+        dataManager.addBrauvorgang(brauvorgang);
+        return neueBrauvorgaenge;
+      });
+    }
+  }, [dataManager, editingBrauvorgang]);
 
   const handleTerminSave = useCallback((termin) => {
     setTermine(prev => {
@@ -113,8 +125,8 @@ function App() {
   const handleEventClick = useCallback((event) => {
     if (event.resource.typ === 'brauvorgang') {
       const brauvorgang = event.resource;
-      const dauer = brauzeiten[brauvorgang.brauart].tage;
-      alert(`Brauvorgang Details:\n\nTitel: ${brauvorgang.titel}\nBrauart: ${brauzeiten[brauvorgang.brauart].name}\nDauer: ${dauer} Tage\nGärtank: ${brauvorgang.gaertankName}\nFässer: ${brauvorgang.faesserNamen.join(', ')}`);
+      setEditingBrauvorgang(brauvorgang);
+      setShowBrauvorgangModal(true);
     } else {
       const termin = event.resource;
       alert(`Termin Details:\n\nTitel: ${termin.titel}\nStart: ${termin.startDatum.toLocaleString()}\nEnde: ${termin.endDatum.toLocaleString()}\nBeschreibung: ${termin.beschreibung || 'Keine'}`);
@@ -207,9 +219,9 @@ function App() {
                       })}
                     />
                   ) : currentView === 'year' ? (
-                    <YearView events={kalenderEvents} currentDate={new Date()} />
+                    <YearView events={kalenderEvents} currentDate={new Date()} onSelectEvent={handleEventClick} />
                   ) : currentView === '3months' ? (
-                    <ThreeMonthsView events={kalenderEvents} currentDate={new Date()} />
+                    <ThreeMonthsView events={kalenderEvents} currentDate={new Date()} onSelectEvent={handleEventClick} />
                   ) : null}
                 </div>
               </Col>
@@ -224,10 +236,14 @@ function App() {
 
           <BrauvorgangModal
             show={showBrauvorgangModal}
-            handleClose={() => setShowBrauvorgangModal(false)}
+            handleClose={() => {
+              setShowBrauvorgangModal(false);
+              setEditingBrauvorgang(null);
+            }}
             resources={resources}
             brauvorgaenge={brauvorgaenge}
             onSave={handleBrauvorgangSave}
+            editingBrauvorgang={editingBrauvorgang}
           />
 
           <TerminModal

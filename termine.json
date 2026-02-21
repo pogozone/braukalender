@@ -3,20 +3,20 @@
   "brauvorgaenge": [
     {
       "id": 1771458385530,
-      "titel": "ttt",
+      "titel": "ttt und noch mal ttt",
       "startDatum": "2026-02-18T23:46:20.660Z",
       "brauart": "obergärig",
-      "gaertankId": 1,
-      "gaertankName": "Gärtank 1",
+      "gaertankId": 2,
+      "gaertankName": "Gärtank 2",
       "belegteFaesser": [
-        1,
-        2,
-        3
+        4,
+        5,
+        6
       ],
       "faesserNamen": [
-        "Fass 1",
-        "Fass 2",
-        "Fass 3"
+        "Fass 4",
+        "Fass 5",
+        "Fass 6"
       ],
       "typ": "brauvorgang"
     },

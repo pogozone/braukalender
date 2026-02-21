@@ -17,7 +17,7 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-const MiniCalendar = ({ events, currentDate, title }) => {
+const MiniCalendar = ({ events, currentDate, title, onSelectEvent }) => {
   return (
     <div className="mini-calendar">
       <h5 className="text-center mb-3">{title}</h5>
@@ -31,6 +31,7 @@ const MiniCalendar = ({ events, currentDate, title }) => {
         views={['month']}
         toolbar={false}
         style={{ height: '300px', fontSize: '12px' }}
+        onSelectEvent={onSelectEvent}
         messages={{
           next: "",
           previous: "",
@@ -49,7 +50,7 @@ const MiniCalendar = ({ events, currentDate, title }) => {
   );
 };
 
-const ThreeMonthsView = ({ events, currentDate }) => {
+const ThreeMonthsView = ({ events, currentDate, onSelectEvent }) => {
   const currentMonth = startOfMonth(currentDate);
   const previousMonth = addMonths(currentMonth, -1);
   const nextMonth = addMonths(currentMonth, 1);
@@ -77,6 +78,7 @@ const ThreeMonthsView = ({ events, currentDate }) => {
             events={filterEventsForMonth(previousMonth)}
             currentDate={previousMonth}
             title={format(previousMonth, 'MMMM yyyy', { locale: de })}
+            onSelectEvent={onSelectEvent}
           />
         </Col>
         <Col md={4}>
@@ -84,6 +86,7 @@ const ThreeMonthsView = ({ events, currentDate }) => {
             events={filterEventsForMonth(currentMonth)}
             currentDate={currentMonth}
             title={format(currentMonth, 'MMMM yyyy', { locale: de })}
+            onSelectEvent={onSelectEvent}
           />
         </Col>
         <Col md={4}>
@@ -91,6 +94,7 @@ const ThreeMonthsView = ({ events, currentDate }) => {
             events={filterEventsForMonth(nextMonth)}
             currentDate={nextMonth}
             title={format(nextMonth, 'MMMM yyyy', { locale: de })}
+            onSelectEvent={onSelectEvent}
           />
         </Col>
       </Row>

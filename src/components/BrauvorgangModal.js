@@ -5,7 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { ResourceManager } from '../utils/resourceManager';
 import { brauzeiten } from '../data/resources';
 
-const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave }) => {
+const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave, editingBrauvorgang }) => {
   const [titel, setTitel] = useState('');
   const [startDatum, setStartDatum] = useState(new Date());
   const [brauart, setBrauart] = useState('obergärig');
@@ -14,12 +14,20 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave 
 
   useEffect(() => {
     if (show) {
-      setTitel('');
-      setStartDatum(new Date());
-      setBrauart('obergärig');
+      if (editingBrauvorgang) {
+        // Edit mode: populate form with existing data
+        setTitel(editingBrauvorgang.titel);
+        setStartDatum(new Date(editingBrauvorgang.startDatum));
+        setBrauart(editingBrauvorgang.brauart);
+      } else {
+        // New mode: reset form
+        setTitel('');
+        setStartDatum(new Date());
+        setBrauart('obergärig');
+      }
       setFehlermeldung('');
     }
-  }, [show]);
+  }, [show, editingBrauvorgang]);
 
   const handleSave = () => {
     setFehlermeldung('');
@@ -51,7 +59,7 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave 
     const faesser = resourceManager.getVerfuegbareFaesser(startDatum, brauart);
 
     const brauvorgang = {
-      id: Date.now(),
+      id: editingBrauvorgang ? editingBrauvorgang.id : Date.now(),
       titel,
       startDatum,
       brauart,
@@ -69,7 +77,7 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave 
   return (
     <Modal show={show} onHide={handleClose} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Neuer Brauvorgang</Modal.Title>
+        <Modal.Title>{editingBrauvorgang ? 'Brauvorgang bearbeiten' : 'Neuer Brauvorgang'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {fehlermeldung && <Alert variant="danger">{fehlermeldung}</Alert>}
@@ -150,7 +158,7 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave 
                    !resourceManager.pruefeGaertankVerfuegbarkeit(startDatum, brauart) || 
                    !resourceManager.pruefeFaesserVerfuegbarkeit(startDatum, brauart)}
         >
-          Brauvorgang speichern
+          {editingBrauvorgang ? 'Brauvorgang aktualisieren' : 'Brauvorgang speichern'}
         </Button>
       </Modal.Footer>
     </Modal>
