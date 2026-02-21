@@ -38,17 +38,75 @@ src/
 
 ## Installation und Start
 
+### Schnellstart (empfohlen)
+```bash
+# Automatisches Setup mit Storage-Auswahl
+./setup.sh
+
+# Oder manuell konfigurieren:
+cp config/file.env .env          # Für File Storage (Default)
+# oder
+cp config/mongodb.env .env         # Für MongoDB
+# oder  
+cp config/mysql.env .env           # Für MySQL
+
+# Abhängigkeiten installieren und starten
+npm install
+npm start
+```
+
+### Manuelle Installation
 1. Abhängigkeiten installieren:
 ```bash
 npm install
 ```
 
-2. Anwendung starten:
+2. Storage-Typ konfigurieren (siehe unten)
+
+3. Anwendung starten:
 ```bash
 npm start
 ```
 
 Die Anwendung läuft unter `http://localhost:3000`
+
+## Storage-Konfiguration
+
+Die Anwendung unterstützt drei verschiedene Storage-Typen:
+
+### 1. File Storage (Default)
+- Einfachste Variante für Entwicklung
+- Daten werden in `termine.json` gespeichert
+- Keine zusätzliche Software erforderlich
+
+```bash
+cp config/file.env .env
+npm start
+```
+
+### 2. MongoDB
+- Skalierbare NoSQL-Datenbank für Produktion
+- Automatisches Setup verfügbar
+
+```bash
+cp config/mongodb.env .env
+./bin/setup-mongodb.sh  # Datenbank einrichten
+npm install mongodb     # Treiber installieren
+npm start
+```
+
+### 3. MySQL  
+- Relationale Datenbank für strukturierte Daten
+- Automatisches Setup verfügbar
+
+```bash
+cp config/mysql.env .env
+./bin/setup-mysql.sh   # Datenbank einrichten
+npm install mysql2      # Treiber installieren
+npm start
+```
+
+**Hinweis**: Passen Sie bei MySQL das Passwort in der `.env` Datei an!
 
 ## Apache2 Konfiguration
 

@@ -26,12 +26,28 @@ Abhängig, ob obergärig (14 Tage) oder untergärig (10 Tage) gebraut wird, ist 
 Die Daten:
 Die Daten sollen im Json Format gespeichert werden.
 Die Daten sollen in der Datei terminde.json gespeichert werden.
+Es gibt einen eigenen Storage Service, der sich um die Daten kümmert. Dabei sollen die Datenquelle austauschbar sein. Per Default soll die Datei termine.json verwendet werden. Über eine Konfiguration soll aber auch eine Datenbank - MongoDB und MySQL - verwendet werden können. angesteuert werden können.
+
+
+Helpers:
+- Erstelle ein Script für Ubuntu im Verzeichnis /bin, mit dem eine zur Applikation passende MongoDB Datenbank erstellt wird.
+- Erstelle ein Script für Ubuntu im Verzeichnis /bin, mit dem eine zur Applikation passende MySQL Datenbank erstellt wird.
 
 
 Todo:
 - Termin für Umdrücken einbauen
 - Farbliche Gestaltung von Brautag/Hauptgärung/Nachgärung und Terminen
+- Import/Export der Termine für Google Calendar
+- Berücksichtigen, dass ein Gärtank nicht von mehreren Brauvorgängen genutzt werden kann
+- Berücksichtigen, dass ein Fass nicht von mehreren Brauvorgängen genutzt werden kann
+- Berücksichtigen, dass ein Kühlschrank nicht von mehreren Brauvorgängen genutzt werden kann
 - 
+- Modularer Aufbau
 - Integration von Aufgaben, ähnlich James
 - Userverwaltung
 - Kennwortschutz
+- Anbindung MongoDB
+
+Dukumentationen:
+- Was muss gemacht wrden, dass in eine Datei geschrieben wird / Schnittstelle
+- Doku so aufbereiten lassen, dass damit sowohl eine KI, als auch ein Mensch die Applikation mühelos nachbauen kann
