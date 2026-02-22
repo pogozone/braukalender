@@ -63,6 +63,69 @@ function App() {
     loadData();
   }, [dataManager]);
 
+  const getUtcDayKey = useCallback((date) => {
+    const d = new Date(date);
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  }, []);
+
+  const diffDays = useCallback((start, end) => {
+    const msPerDay = 24 * 60 * 60 * 1000;
+    return Math.floor((getUtcDayKey(end) - getUtcDayKey(start)) / msPerDay);
+  }, [getUtcDayKey]);
+
+  const toLocalStartOfDay = useCallback((date) => {
+    const d = new Date(date);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }, []);
+
+  const addLocalDays = useCallback((date, days) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  }, []);
+
+  const buildBrauvorgangObjekt = useCallback((brauvorgang) => {
+    const tage = brauzeiten[brauvorgang.brauart].tage;
+
+    const dateBT = toLocalStartOfDay(brauvorgang.startDatum);
+    const dateStartHG = addLocalDays(dateBT, 1);
+    const dateEndHGDefault = addLocalDays(dateStartHG, tage - 1);
+
+    const dateU = brauvorgang.umdrueckDatum
+      ? toLocalStartOfDay(brauvorgang.umdrueckDatum)
+      : dateEndHGDefault;
+
+    const dateStartNG = new Date(dateU);
+    const dateEndNG = addLocalDays(dateStartNG, tage - 1);
+    const dateE = new Date(dateEndNG);
+
+    return {
+      ...brauvorgang,
+      brautag: {
+        dateBT,
+        background: 'green'
+      },
+      hauptgaerung: {
+        dateStartHG,
+        dateEndHG: new Date(dateU),
+        background: 'yellow'
+      },
+      umdruecken: {
+        dateU: new Date(dateU),
+        background: 'lightgreen'
+      },
+      nachgaerung: {
+        dateStartNG,
+        dateEndNG,
+        background: 'silver'
+      },
+      ende: {
+        dateE,
+        background: 'green'
+      }
+    };
+  }, [addLocalDays, toLocalStartOfDay]);
+
   const kalenderEvents = [
     ...(termine || []).map(termin => {
       const startDate = new Date(termin.startDatum);
@@ -79,17 +142,17 @@ function App() {
       };
     }),
     ...(brauvorgaenge || []).flatMap(brauvorgang => {
-      const dauer = brauzeiten[brauvorgang.brauart].tage;
-      const startDate = new Date(brauvorgang.startDatum);
-      const endDate = brauvorgang.umdrueckDatum ? new Date(brauvorgang.umdrueckDatum) : new Date(startDate);
-      endDate.setDate(endDate.getDate() + dauer);
+      const brauObj = buildBrauvorgangObjekt(brauvorgang);
+
+      const startDate = new Date(brauObj.brautag.dateBT);
+      const endExclusive = addLocalDays(brauObj.ende.dateE, 1);
       
       // Haupt-Brauvorgang Event
       const brauvorgangEvent = {
         id: brauvorgang.id,
         title: `${brauvorgang.titel} - ${brauvorgang.gaertankName}`,
         start: startDate,
-        end: endDate,
+        end: endExclusive,
         allDay: true,
         resource: brauvorgang,
         className: 'brauvorgang-event'
@@ -97,25 +160,106 @@ function App() {
       
       // Umdrücken-Termin (falls vorhanden)
       const events = [brauvorgangEvent];
-      if (brauvorgang.umdrueckDatum) {
-        const umdrueckDate = new Date(brauvorgang.umdrueckDatum);
-        const umdrueckEndDate = new Date(umdrueckDate);
-        umdrueckEndDate.setDate(umdrueckEndDate.getDate() + 1); // 1 Tag für Umdrücken
-        
-        events.push({
-          id: `umdrueck-${brauvorgang.id}`,
-          title: `Umdrücken: ${brauvorgang.titel}`,
-          start: umdrueckDate,
-          end: umdrueckEndDate,
-          allDay: true,
-          resource: { ...brauvorgang, typ: 'umdrueck', umdrueckDatum: brauvorgang.umdrueckDatum },
-          className: 'umdrueck-event'
-        });
-      }
       
       return events;
     })
   ];
+
+  const eventPropGetter = useCallback((event) => {
+    return { className: event.className };
+  }, []);
+
+  const KalenderEventRenderer = useCallback((props) => {
+    const { event } = props;
+    if (event.className !== 'brauvorgang-event') {
+      return <span>{event.title}</span>;
+    }
+
+    const brauObj = buildBrauvorgangObjekt(event.resource);
+    // react-big-calendar kann pro View/Zeile ein "geschnittenes" Segment rendern.
+    // Wenn start/end (oder slotStart/slotEnd) im Renderer-Props vorhanden sind,
+    // verwenden wir diese Segment-Grenzen, damit z.B. in einer Wochenreihe nur 7 Tage erscheinen.
+    const segmentStart = props.start || props.slotStart || event.start;
+    const segmentEndExclusive = props.end || props.slotEnd || event.end;
+
+    // Zusätzlich: Auf den echten Event-Zeitraum clippen.
+    // Beispiel Woche 15-21: Event existiert ggf. erst ab 19. -> dann nur 19/20/21 rendern.
+    const eventStart = new Date(event.start);
+    const eventEndExclusive = new Date(event.end);
+
+    const maxByDay = (a, b) => (getUtcDayKey(a) >= getUtcDayKey(b) ? a : b);
+    const minByDay = (a, b) => (getUtcDayKey(a) <= getUtcDayKey(b) ? a : b);
+
+    const visibleStart = maxByDay(new Date(segmentStart), eventStart);
+    const visibleEnd = minByDay(new Date(segmentEndExclusive), eventEndExclusive);
+
+    const start = new Date(visibleStart);
+    const endExclusive = new Date(visibleEnd);
+    const totalDays = diffDays(start, endExclusive);
+
+    if (!Number.isFinite(totalDays) || totalDays <= 0) {
+      return <span>{event.title}</span>;
+    }
+
+    const isSameDay = (a, b) => getUtcDayKey(a) === getUtcDayKey(b);
+
+    const getPhaseTypeForDate = (dayDate) => {
+      if (isSameDay(dayDate, brauObj.brautag.dateBT)) return 'brautag';
+      if (isSameDay(dayDate, brauObj.ende.dateE)) return 'ende';
+      if (isSameDay(dayDate, brauObj.umdruecken.dateU)) return 'umdruecken';
+
+      // Hauptgärung: dateStartHG .. (dateU - 1)
+      if (getUtcDayKey(dayDate) >= getUtcDayKey(brauObj.hauptgaerung.dateStartHG) && getUtcDayKey(dayDate) < getUtcDayKey(brauObj.umdruecken.dateU)) {
+        return 'hauptgaerung';
+      }
+
+      // Nachgärung: (dateU + 1) .. (dateE - 1)
+      const ngStart = addLocalDays(brauObj.umdruecken.dateU, 1);
+      if (getUtcDayKey(dayDate) >= getUtcDayKey(ngStart) && getUtcDayKey(dayDate) < getUtcDayKey(brauObj.ende.dateE)) {
+        return 'nachgaerung';
+      }
+
+      return 'brautag';
+    };
+
+    return (
+      <div className="brauvorgang-structure" id={`Brauvorgang-${event.id}`}>
+        <div className="brauvorgang-title">{event.title}</div>
+        <div className="brauvorgang-phases">
+          {Array.from({ length: totalDays }).map((_, i) => {
+            const dayDate = addLocalDays(start, i);
+            const type = getPhaseTypeForDate(dayDate);
+            const dd = String(dayDate.getDate()).padStart(2, '0');
+            const mm = String(dayDate.getMonth() + 1).padStart(2, '0');
+            const yyyy = String(dayDate.getFullYear());
+            const label = `${dd}.${mm}`;
+            const full = `${dd}.${mm}.${yyyy}`;
+            const id = type === 'hauptgaerung'
+              ? `Hauptgaerung-${full}`
+              : type === 'umdruecken'
+                ? `Umdruecken-${full}`
+                : type === 'nachgaerung'
+                  ? `Nachgaerung-${full}`
+                  : type === 'ende'
+                    ? `Ende-${full}`
+                    : `Brautag-${full}`;
+
+            return (
+              <div
+                key={full}
+                className={`brauvorgang-day brauvorgang-day--${type}`}
+                id={id}
+                data-date={full}
+                title={full}
+              >
+                {label}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }, [addLocalDays, buildBrauvorgangObjekt, diffDays, getUtcDayKey]);
 
   const handleBrauvorgangSave = useCallback((brauvorgang) => {
     if (editingBrauvorgang) {
@@ -261,14 +405,13 @@ function App() {
                         event: "Termin",
                         noEventsInRange: "Keine Termine in diesem Zeitraum"
                       }}
-                      eventPropGetter={(event) => ({
-                        className: event.className
-                      })}
+                      components={{ event: KalenderEventRenderer }}
+                      eventPropGetter={eventPropGetter}
                     />
                   ) : currentView === 'year' ? (
-                    <YearView events={kalenderEvents} currentDate={new Date()} onSelectEvent={handleEventClick} onDoubleClickEvent={handleEventDelete} />
+                    <YearView events={kalenderEvents} currentDate={new Date()} onSelectEvent={handleEventClick} onDoubleClickEvent={handleEventDelete} eventRenderer={KalenderEventRenderer} eventPropGetter={eventPropGetter} />
                   ) : currentView === '3months' ? (
-                    <ThreeMonthsView events={kalenderEvents} currentDate={new Date()} onSelectEvent={handleEventClick} onDoubleClickEvent={handleEventDelete} />
+                    <ThreeMonthsView events={kalenderEvents} currentDate={new Date()} onSelectEvent={handleEventClick} onDoubleClickEvent={handleEventDelete} eventRenderer={KalenderEventRenderer} eventPropGetter={eventPropGetter} />
                   ) : null}
                 </div>
               </Col>

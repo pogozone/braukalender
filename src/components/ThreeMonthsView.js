@@ -17,7 +17,7 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-const MiniCalendar = ({ events, currentDate, title, onSelectEvent, onDoubleClickEvent }) => {
+const MiniCalendar = ({ events, currentDate, title, onSelectEvent, onDoubleClickEvent, eventRenderer, eventPropGetter }) => {
   return (
     <div className="mini-calendar">
       <h5 className="text-center mb-3">{title}</h5>
@@ -33,6 +33,8 @@ const MiniCalendar = ({ events, currentDate, title, onSelectEvent, onDoubleClick
         style={{ height: '300px', fontSize: '12px' }}
         onSelectEvent={onSelectEvent}
         onDoubleClickEvent={onDoubleClickEvent}
+        components={eventRenderer ? { event: eventRenderer } : undefined}
+        eventPropGetter={eventPropGetter}
         messages={{
           next: "",
           previous: "",
@@ -51,7 +53,7 @@ const MiniCalendar = ({ events, currentDate, title, onSelectEvent, onDoubleClick
   );
 };
 
-const ThreeMonthsView = ({ events, currentDate, onSelectEvent, onDoubleClickEvent }) => {
+const ThreeMonthsView = ({ events, currentDate, onSelectEvent, onDoubleClickEvent, eventRenderer, eventPropGetter }) => {
   const currentMonth = startOfMonth(currentDate);
   const previousMonth = addMonths(currentMonth, -1);
   const nextMonth = addMonths(currentMonth, 1);
@@ -80,7 +82,9 @@ const ThreeMonthsView = ({ events, currentDate, onSelectEvent, onDoubleClickEven
             currentDate={previousMonth}
             title={format(previousMonth, 'MMMM yyyy', { locale: de })}
             onSelectEvent={onSelectEvent}
-        onDoubleClickEvent={onDoubleClickEvent}
+            onDoubleClickEvent={onDoubleClickEvent}
+            eventRenderer={eventRenderer}
+            eventPropGetter={eventPropGetter}
           />
         </Col>
         <Col md={4}>
@@ -89,7 +93,9 @@ const ThreeMonthsView = ({ events, currentDate, onSelectEvent, onDoubleClickEven
             currentDate={currentMonth}
             title={format(currentMonth, 'MMMM yyyy', { locale: de })}
             onSelectEvent={onSelectEvent}
-        onDoubleClickEvent={onDoubleClickEvent}
+            onDoubleClickEvent={onDoubleClickEvent}
+            eventRenderer={eventRenderer}
+            eventPropGetter={eventPropGetter}
           />
         </Col>
         <Col md={4}>
@@ -98,7 +104,9 @@ const ThreeMonthsView = ({ events, currentDate, onSelectEvent, onDoubleClickEven
             currentDate={nextMonth}
             title={format(nextMonth, 'MMMM yyyy', { locale: de })}
             onSelectEvent={onSelectEvent}
-        onDoubleClickEvent={onDoubleClickEvent}
+            onDoubleClickEvent={onDoubleClickEvent}
+            eventRenderer={eventRenderer}
+            eventPropGetter={eventPropGetter}
           />
         </Col>
       </Row>
