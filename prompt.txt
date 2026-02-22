@@ -41,6 +41,7 @@ Edit:
 Umdrücken:
 - Innerhalb eines Brauvorgangs gibt es einen weiteren Termin "Umdrücken". Der Termin ist per Default entsprechend der Brauart (obergärig 14 Tage, untergärig 10 Tage) nach dem Brauvorgang. Der Termin soll bearbeitbar sein. Je nach dem ob er nach vorne oder hinten geschoben wird, verschiebt sich auch das Ende des Brauvorgangs.
 - Wenn ich die Brauart ändere, dann soll sich automatisch der Termin für Umdrücken auch ändern.
+- Das Umdrückdatum soll in der kalendarischen Ansicht innerhalb des Brauvorgangs hervorgehoben werden.
 
 Todo:
 - Termin für Umdrücken einbauen
