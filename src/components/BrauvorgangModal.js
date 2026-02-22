@@ -10,6 +10,7 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
   const [startDatum, setStartDatum] = useState(new Date());
   const [brauart, setBrauart] = useState('obergärig');
   const [umdrueckDatum, setUmdrueckDatum] = useState(new Date());
+  const [umdrueckManuell, setUmdrueckManuell] = useState(false);
   const [fehlermeldung, setFehlermeldung] = useState('');
 
   // Helper function to get fresh resource manager
@@ -22,13 +23,16 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
         setTitel(editingBrauvorgang.titel);
         setStartDatum(new Date(editingBrauvorgang.startDatum));
         setBrauart(editingBrauvorgang.brauart);
-        setUmdrueckDatum(editingBrauvorgang.umdrueckDatum ? new Date(editingBrauvorgang.umdrueckDatum) : new Date());
+        const existingUmdrueck = editingBrauvorgang.umdrueckDatum ? new Date(editingBrauvorgang.umdrueckDatum) : new Date();
+        setUmdrueckDatum(existingUmdrueck);
+        setUmdrueckManuell(Boolean(editingBrauvorgang.umdrueckDatum));
       } else {
         // New mode: reset form
         setTitel('');
         setStartDatum(new Date());
         setBrauart('obergärig');
         setUmdrueckDatum(new Date());
+        setUmdrueckManuell(false);
       }
       setFehlermeldung('');
     }
@@ -38,11 +42,37 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
     // Update umdrueckDatum when brauart changes
     if (show) {
       const dauer = brauzeiten[brauart].tage;
-      const neuesUmdrueckDatum = new Date(startDatum);
-      neuesUmdrueckDatum.setDate(neuesUmdrueckDatum.getDate() + dauer);
-      setUmdrueckDatum(neuesUmdrueckDatum);
+      if (!umdrueckManuell) {
+        const neuesUmdrueckDatum = new Date(startDatum);
+        neuesUmdrueckDatum.setDate(neuesUmdrueckDatum.getDate() + dauer);
+        setUmdrueckDatum(neuesUmdrueckDatum);
+      }
     }
-  }, [brauart, startDatum, show]);
+  }, [brauart, startDatum, show, umdrueckManuell]);
+
+  const handleBrauartChange = (e) => {
+    setBrauart(e.target.value);
+    setUmdrueckManuell(false);
+  };
+
+  const handleUmdrueckChange = (date) => {
+    setUmdrueckDatum(date);
+    setUmdrueckManuell(true);
+  };
+
+  const dauerTage = brauzeiten[brauart].tage;
+  const dateBT = new Date(startDatum);
+  dateBT.setHours(0, 0, 0, 0);
+  const dateStartHG = new Date(dateBT);
+  dateStartHG.setDate(dateStartHG.getDate() + 1);
+  const dateEndHG = new Date(umdrueckDatum);
+  dateEndHG.setHours(0, 0, 0, 0);
+  const dateU = new Date(dateEndHG);
+  const dateStartNG = new Date(dateU);
+  const dateEndNG = new Date(dateStartNG);
+  dateEndNG.setDate(dateEndNG.getDate() + (dauerTage - 1));
+  const dateE = new Date(dateEndNG);
+  const fmt = (d) => d.toLocaleDateString('de-DE');
 
   const handleSave = () => {
     setFehlermeldung('');
@@ -133,7 +163,7 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
             <Form.Label>Brauart</Form.Label>
             <Form.Select
               value={brauart}
-              onChange={(e) => setBrauart(e.target.value)}
+              onChange={handleBrauartChange}
             >
               <option value="obergärig">Obergärig (14 Tage)</option>
               <option value="untergärig">Untergärig (10 Tage)</option>
@@ -144,7 +174,7 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
             <Form.Label>Umdrücken</Form.Label>
             <DatePicker
               selected={umdrueckDatum}
-              onChange={setUmdrueckDatum}
+              onChange={handleUmdrueckChange}
               className="form-control"
               dateFormat="dd.MM.yyyy"
               minDate={startDatum}
@@ -153,6 +183,17 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
               Datum für das Umdrücken (Standard: {brauzeiten[brauart].tage} Tage nach Start)
             </Form.Text>
           </Form.Group>
+
+          <div className="mb-3">
+            <h6>Phasen (berechnet):</h6>
+            <ul>
+              <li>Brautag: {fmt(dateBT)}</li>
+              <li>Hauptgärung: {fmt(dateStartHG)} – {fmt(dateEndHG)}</li>
+              <li>Umdrücken: {fmt(dateU)}</li>
+              <li>Nachgärung: {fmt(dateStartNG)} – {fmt(dateEndNG)}</li>
+              <li>Ende: {fmt(dateE)}</li>
+            </ul>
+          </div>
 
           <div className="mb-3">
             <h6>Benötigte Ressourcen:</h6>
