@@ -155,7 +155,7 @@ const BrauvorgangModal = ({ show, handleClose, resources, brauvorgaenge, onSave,
               onChange={setStartDatum}
               className="form-control"
               dateFormat="dd.MM.yyyy"
-              minDate={new Date()}
+              minDate={editingBrauvorgang ? undefined : new Date()}
             />
           </Form.Group>
 

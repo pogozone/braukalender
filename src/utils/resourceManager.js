@@ -6,10 +6,45 @@ export class ResourceManager {
     this.brauvorgaenge = brauvorgaenge;
   }
 
+  startOfDay(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  addDays(date, days) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  }
+
+  getBrauvorgangZeitraum(brauvorgang) {
+    const tage = brauzeiten[brauvorgang.brauart].tage;
+
+    const startBT = this.startOfDay(new Date(brauvorgang.startDatum));
+    const startHG = this.addDays(startBT, 1);
+    const defaultU = this.addDays(startHG, tage - 1);
+    const dateU = brauvorgang.umdrueckDatum
+      ? this.startOfDay(new Date(brauvorgang.umdrueckDatum))
+      : defaultU;
+
+    const endNG = this.addDays(dateU, tage - 1);
+    const endExclusive = this.addDays(endNG, 1);
+
+    return { start: startBT, endExclusive };
+  }
+
+  intervalOverlaps(aStart, aEndExclusive, bStart, bEndExclusive) {
+    return aStart < bEndExclusive && bStart < aEndExclusive;
+  }
+
   pruefeGaertankVerfuegbarkeit(startDatum, brauart, excludeBrauvorgangId = null) {
-    const dauer = brauzeiten[brauart].tage;
-    const endDatum = new Date(startDatum);
-    endDatum.setDate(endDatum.getDate() + dauer);
+    // Verfügbarkeit ab Brautag bis Ende Nachgärung
+    const tage = brauzeiten[brauart].tage;
+    const requestStart = this.startOfDay(new Date(startDatum));
+    const requestUDefault = this.addDays(this.addDays(requestStart, 1), tage - 1);
+    const requestEndNG = this.addDays(requestUDefault, tage - 1);
+    const requestEndExclusive = this.addDays(requestEndNG, 1);
 
     return this.resources.gaertanks.some(tank => {
       return !this.brauvorgaenge.some(brauvorgang => {
@@ -19,12 +54,8 @@ export class ResourceManager {
         }
         
         if (brauvorgang.gaertankId === tank.id) {
-          const brauvorgangEnde = brauvorgang.umdrueckDatum 
-            ? new Date(brauvorgang.umdrueckDatum)
-            : new Date(brauvorgang.startDatum);
-          brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
-          
-          return !(endDatum <= brauvorgang.startDatum || startDatum >= brauvorgangEnde);
+          const { start, endExclusive } = this.getBrauvorgangZeitraum(brauvorgang);
+          return this.intervalOverlaps(requestStart, requestEndExclusive, start, endExclusive);
         }
         return false;
       });
@@ -32,10 +63,13 @@ export class ResourceManager {
   }
 
   pruefeFaesserVerfuegbarkeit(startDatum, brauart, excludeBrauvorgangId = null) {
-    const dauer = brauzeiten[brauart].tage;
     const benoetigteFaesser = 3;
-    const endDatum = new Date(startDatum);
-    endDatum.setDate(endDatum.getDate() + dauer);
+
+    const tage = brauzeiten[brauart].tage;
+    const requestStart = this.startOfDay(new Date(startDatum));
+    const requestUDefault = this.addDays(this.addDays(requestStart, 1), tage - 1);
+    const requestEndNG = this.addDays(requestUDefault, tage - 1);
+    const requestEndExclusive = this.addDays(requestEndNG, 1);
 
     const verfuegbareFaesser = this.resources.faesser.filter(fass => {
       return !this.brauvorgaenge.some(brauvorgang => {
@@ -45,12 +79,8 @@ export class ResourceManager {
         }
         
         if (brauvorgang.belegteFaesser.includes(fass.id)) {
-          const brauvorgangEnde = brauvorgang.umdrueckDatum 
-            ? new Date(brauvorgang.umdrueckDatum)
-            : new Date(brauvorgang.startDatum);
-          brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
-          
-          return !(endDatum <= brauvorgang.startDatum || startDatum >= brauvorgangEnde);
+          const { start, endExclusive } = this.getBrauvorgangZeitraum(brauvorgang);
+          return this.intervalOverlaps(requestStart, requestEndExclusive, start, endExclusive);
         }
         return false;
       });
@@ -60,9 +90,11 @@ export class ResourceManager {
   }
 
   getVerfuegbarenGaertank(startDatum, brauart, excludeBrauvorgangId = null) {
-    const dauer = brauzeiten[brauart].tage;
-    const endDatum = new Date(startDatum);
-    endDatum.setDate(endDatum.getDate() + dauer);
+    const tage = brauzeiten[brauart].tage;
+    const requestStart = this.startOfDay(new Date(startDatum));
+    const requestUDefault = this.addDays(this.addDays(requestStart, 1), tage - 1);
+    const requestEndNG = this.addDays(requestUDefault, tage - 1);
+    const requestEndExclusive = this.addDays(requestEndNG, 1);
 
     return this.resources.gaertanks.find(tank => {
       return !this.brauvorgaenge.some(brauvorgang => {
@@ -72,12 +104,8 @@ export class ResourceManager {
         }
         
         if (brauvorgang.gaertankId === tank.id) {
-          const brauvorgangEnde = brauvorgang.umdrueckDatum 
-            ? new Date(brauvorgang.umdrueckDatum)
-            : new Date(brauvorgang.startDatum);
-          brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
-          
-          return !(endDatum <= brauvorgang.startDatum || startDatum >= brauvorgangEnde);
+          const { start, endExclusive } = this.getBrauvorgangZeitraum(brauvorgang);
+          return this.intervalOverlaps(requestStart, requestEndExclusive, start, endExclusive);
         }
         return false;
       });
@@ -85,9 +113,11 @@ export class ResourceManager {
   }
 
   getVerfuegbareFaesser(startDatum, brauart, excludeBrauvorgangId = null) {
-    const dauer = brauzeiten[brauart].tage;
-    const endDatum = new Date(startDatum);
-    endDatum.setDate(endDatum.getDate() + dauer);
+    const tage = brauzeiten[brauart].tage;
+    const requestStart = this.startOfDay(new Date(startDatum));
+    const requestUDefault = this.addDays(this.addDays(requestStart, 1), tage - 1);
+    const requestEndNG = this.addDays(requestUDefault, tage - 1);
+    const requestEndExclusive = this.addDays(requestEndNG, 1);
 
     const verfuegbareFaesser = this.resources.faesser.filter(fass => {
       return !this.brauvorgaenge.some(brauvorgang => {
@@ -97,12 +127,8 @@ export class ResourceManager {
         }
         
         if (brauvorgang.belegteFaesser.includes(fass.id)) {
-          const brauvorgangEnde = brauvorgang.umdrueckDatum 
-            ? new Date(brauvorgang.umdrueckDatum)
-            : new Date(brauvorgang.startDatum);
-          brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
-          
-          return !(endDatum <= brauvorgang.startDatum || startDatum >= brauvorgangEnde);
+          const { start, endExclusive } = this.getBrauvorgangZeitraum(brauvorgang);
+          return this.intervalOverlaps(requestStart, requestEndExclusive, start, endExclusive);
         }
         return false;
       });
@@ -112,16 +138,17 @@ export class ResourceManager {
   }
 
   getRessourcenStatus() {
-    const heute = new Date();
+    return this.getRessourcenStatusAm(new Date());
+  }
+
+  getRessourcenStatusAm(datum) {
+    const stichtag = this.startOfDay(new Date(datum));
     const status = {
       gaertanks: this.resources.gaertanks.map(tank => {
         const belegt = this.brauvorgaenge.some(brauvorgang => {
           if (brauvorgang.gaertankId === tank.id) {
-            const brauvorgangEnde = brauvorgang.umdrueckDatum 
-              ? new Date(brauvorgang.umdrueckDatum)
-              : new Date(brauvorgang.startDatum);
-            brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
-            return heute < brauvorgangEnde;
+            const { start, endExclusive } = this.getBrauvorgangZeitraum(brauvorgang);
+            return stichtag >= start && stichtag < endExclusive;
           }
           return false;
         });
@@ -130,18 +157,15 @@ export class ResourceManager {
       faesser: this.resources.faesser.map(fass => {
         const belegt = this.brauvorgaenge.some(brauvorgang => {
           if (brauvorgang.belegteFaesser.includes(fass.id)) {
-            const brauvorgangEnde = brauvorgang.umdrueckDatum 
-              ? new Date(brauvorgang.umdrueckDatum)
-              : new Date(brauvorgang.startDatum);
-            brauvorgangEnde.setDate(brauvorgangEnde.getDate() + brauzeiten[brauvorgang.brauart].tage);
-            return heute < brauvorgangEnde;
+            const { start, endExclusive } = this.getBrauvorgangZeitraum(brauvorgang);
+            return stichtag >= start && stichtag < endExclusive;
           }
           return false;
         });
         return { ...fass, status: belegt ? 'belegt' : 'verfügbar' };
       })
     };
-    
+
     return status;
   }
 }

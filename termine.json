@@ -1,5 +1,14 @@
 {
-  "termine": [],
+  "termine": [
+    {
+      "id": 1771850418580,
+      "titel": "Auch mal einen Termin eintagen",
+      "startDatum": "2026-02-23T12:40:03.209Z",
+      "endDatum": "2026-02-23T12:40:03.209Z",
+      "beschreibung": "",
+      "typ": "termin"
+    }
+  ],
   "brauvorgaenge": [
     {
       "id": 1771458385530,

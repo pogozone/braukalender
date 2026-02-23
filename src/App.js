@@ -35,6 +35,7 @@ function App() {
   const [resources, setResources] = useState(initialResources);
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState('calendar');
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Daten beim Start laden
   useEffect(() => {
@@ -323,6 +324,12 @@ function App() {
     }
   }, [handleBrauvorgangDelete]);
 
+  const handleSelectSlot = useCallback((slotInfo) => {
+    if (slotInfo?.start) {
+      setSelectedDate(new Date(slotInfo.start));
+    }
+  }, []);
+
   return (
     <div>
       {isLoading ? (
@@ -390,6 +397,9 @@ function App() {
                       style={{ height: '600px' }}
                       views={['month', 'week', 'day', 'agenda']}
                       defaultView="month"
+                      drilldownView={null}
+                      selectable
+                      onSelectSlot={handleSelectSlot}
                       onSelectEvent={handleEventClick}
                       onDoubleClickEvent={handleEventDelete}
                       messages={{
@@ -419,6 +429,7 @@ function App() {
                 <RessourcenUebersicht 
                   resources={resources} 
                   brauvorgaenge={brauvorgaenge} 
+                  selectedDate={selectedDate}
                 />
               </Col>
             </Row>

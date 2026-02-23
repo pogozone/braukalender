@@ -2,17 +2,21 @@ import React from 'react';
 import { Card, Row, Col, Badge } from 'react-bootstrap';
 import { ResourceManager } from '../utils/resourceManager';
 
-const RessourcenUebersicht = ({ resources, brauvorgaenge }) => {
+const RessourcenUebersicht = ({ resources, brauvorgaenge, selectedDate }) => {
   const resourceManager = new ResourceManager(resources, brauvorgaenge);
-  const status = resourceManager.getRessourcenStatus();
+  const date = selectedDate ? new Date(selectedDate) : new Date();
+  const status = resourceManager.getRessourcenStatusAm(date);
 
   const verfuegbareGaertanks = status.gaertanks.filter(t => t.status === 'verfügbar').length;
   const verfuegbareFaesser = status.faesser.filter(f => f.status === 'verfügbar').length;
+
+  const dateLabel = date.toLocaleDateString('de-DE');
 
   return (
     <Card className="mb-4">
       <Card.Header>
         <h5>Ressourcenübersicht</h5>
+        <div className="text-muted">Verfügbarkeit am {dateLabel}</div>
       </Card.Header>
       <Card.Body>
         <Row>
