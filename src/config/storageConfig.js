@@ -2,7 +2,7 @@
 const STORAGE_CONFIG = {
   type: process.env.REACT_APP_STORAGE_TYPE || 'file', // 'file', 'mongodb', 'mysql'
   file: {
-    path: './termine.json'
+    path: process.env.NODE_ENV === 'production' ? '/static/data/termine.json' : './termine.json'
   },
   mongodb: {
     url: process.env.REACT_APP_MONGODB_URL || 'mongodb://localhost:27017/braukalender',

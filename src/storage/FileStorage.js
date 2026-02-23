@@ -6,17 +6,32 @@ export class FileStorage extends StorageInterface {
   constructor() {
     super();
     this.apiUrl = process.env.NODE_ENV === 'production' 
-      ? '/api/data' 
+      ? './static/data/termine.json' 
       : 'http://localhost:3001/api/data';
   }
 
   async load() {
     try {
+      // Load base data from file
       const response = await fetch(this.apiUrl);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
+      
+      // In production, merge with localStorage changes
+      if (process.env.NODE_ENV === 'production') {
+        const localData = localStorage.getItem('braukalender_data');
+        if (localData) {
+          const parsed = JSON.parse(localData);
+          return {
+            termine: parsed.termine || data.termine || [],
+            brauvorgaenge: parsed.brauvorgaenge || data.brauvorgaenge || [],
+            resources: parsed.resources || data.resources || {}
+          };
+        }
+      }
+      
       return {
         termine: data.termine || [],
         brauvorgaenge: data.brauvorgaenge || [],
@@ -34,6 +49,13 @@ export class FileStorage extends StorageInterface {
 
   async save(data) {
     try {
+      // In production, save to localStorage
+      if (process.env.NODE_ENV === 'production') {
+        localStorage.setItem('braukalender_data', JSON.stringify(data));
+        return { success: true };
+      }
+      
+      // In development, POST to server
       const response = await fetch(this.apiUrl, {
         method: 'POST',
         headers: {

@@ -1,0 +1,67 @@
+{
+  "termine": [
+  ],
+  "brauvorgaenge": [
+    {
+      "id": 1771458385530,
+      "titel": "ttt",
+      "startDatum": "2026-02-18T23:46:20.660Z",
+      "brauart": "obergärig",
+      "umdrueckDatum": "2026-03-08T23:46:20.000Z",
+      "gaertankId": 1,
+      "gaertankName": "Gärtank 1",
+      "belegteFaesser": [
+        1,
+        2,
+        3
+      ],
+      "faesserNamen": [
+        "Fass 1",
+        "Fass 2",
+        "Fass 3"
+      ],
+      "typ": "brauvorgang"
+    },
+    {
+      "id": 1771702851079,
+      "titel": "qqq",
+      "startDatum": "2026-02-21T19:40:46.664Z",
+      "brauart": "obergärig",
+      "umdrueckDatum": "2026-03-07T19:40:46.664Z",
+      "gaertankId": 3,
+      "gaertankName": "Gärtank 3",
+      "belegteFaesser": [
+        7,
+        8,
+        9
+      ],
+      "faesserNamen": [
+        "Fass 7",
+        "Fass 8",
+        "Fass 9"
+      ],
+      "typ": "brauvorgang"
+    },
+    {
+      "id": 1771707272883,
+      "titel": "nnn",
+      "startDatum": "2026-02-21T20:54:28.474Z",
+      "brauart": "obergärig",
+      "umdrueckDatum": "2026-03-07T20:54:28.474Z",
+      "gaertankId": 2,
+      "gaertankName": "Gärtank 2",
+      "belegteFaesser": [
+        4,
+        5,
+        6
+      ],
+      "faesserNamen": [
+        "Fass 4",
+        "Fass 5",
+        "Fass 6"
+      ],
+      "typ": "brauvorgang"
+    }
+  ],
+  "resources": {}
+}

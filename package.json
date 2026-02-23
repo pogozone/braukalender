@@ -10,7 +10,8 @@
     "server": "node server.js",
     "server-mongodb": "node server-mongodb.js",
     "dev": "concurrently \"npm run server\" \"npm start\"",
-    "build": "react-scripts build",
+    "build": "react-scripts build && npm run postbuild",
+    "postbuild": "mkdir -p build/static/data && cp termine.json build/static/data/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
